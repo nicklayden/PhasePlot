@@ -42,6 +42,10 @@ void glSetup(boost::program_options::variables_map& vm, int argc, char** argv);
 template <class T>
 void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r = 0.0, float g = 0.0, float b = 1.0);
 
+template <class T>
+void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vector<T> > z, float r, float g, float b);
+
+
 inline double f(double z, double eta) {
     return exp(-z*z - eta*eta);
 }
@@ -51,6 +55,8 @@ inline double zero_f(double r, double k){
 }
 
 inline double alan_f(double r, double k) {
+    // Alans specific prob. Just wanted a graph showing the function
+    // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
     double a,b,c,d,e,f,g,h;
     a = sinh(k*(M_PI - r) + sinh(k*r));
     b = cosh(k*(M_PI - r) - cosh(k*r));
@@ -65,6 +71,19 @@ inline double alan_f(double r, double k) {
     return e*(  f*a + k*b + g*( h*c + k*d )  );
 }
 
+inline double alan_f_86(double r, double k) {
+    // Alans specific prob. Just wanted a graph showing the function
+    // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
+    double a,b,c,d,e,f;
+    a = sinh(k*M_PI);
+    b = cosh(k*r);
+    c = cosh(k*M_PI);
+    d = sinh(k*r);
+    e = -cos(r)/(sin(r)*sin(r));
+    f = k/sin(r);
+
+    return e*(a*b - c*d + d) + f*(a*d - c*b + b);
+}
 
 
 class func {
@@ -93,6 +112,8 @@ class alan_func {
 
 
 
+
+
 int main(int argc, char** argv ){  
 
     /* #####################################################################################
@@ -112,7 +133,8 @@ int main(int argc, char** argv ){
      * Idea: Draw each line (slice) of the function per loop
      *       to fill up the space.
      * ***********************************/
-    std::vector<double> xs,ys,zs;
+    std::vector<std::vector<double> > zs;
+    std::vector<double> xs,ys,slice;
     double begin,end,step,r0,rn,k0,kn;
     uint N;
     begin = -5;
@@ -120,24 +142,39 @@ int main(int argc, char** argv ){
     N = 40;
     step = (end - begin)/N;
 
+    // Simple uniform grid
     // for (size_t i = 0; i < N; i++)
     // {
     //     xs.push_back(begin + step*i);
     //     ys.push_back(begin + step*i);
     // }
     
-    r0 = M_PI/4. - M_PI/4 + 0.1;
-    rn = M_PI/4. + M_PI/4;
+
+    // Alan's 2 Variable system
+    r0 = M_PI/4. - 0.2;
+    rn = M_PI/4. + 0.2;
     k0 = 1.01;
     kn = 2;
 
+    
     for (size_t i = 0; i < N; i++)
     {
+        std::cout << "F(r,k)= " << alan_f_86(M_PI/2.,1.5) << "  r= " << r0+i*(rn-r0)/N << std::endl;
         xs.push_back(r0 + ((rn-r0)/N)*i );
         ys.push_back(k0 + ((kn-k0)/N)*i);
     }
     
-
+    // Evaluating the function on the mesh here.
+    for (size_t i = 0; i < xs.size(); i++)
+    {
+        for (size_t j = 0; j < ys.size(); j++)
+        {
+            slice.push_back(alan_f_86(xs[i],ys[j]));
+        }
+        zs.push_back(slice);
+        slice.clear();
+    }
+    
 
 
 
@@ -189,6 +226,10 @@ int main(int argc, char** argv ){
         need to capture variables from the config file, and assign them in this block of main.
         #####################################################################################
     */
+
+   /*
+    This block needs to be removed from main!
+   */
     boost::program_options::variables_map vm;
     status = config_mapping(argc, argv, vm);
     std::cout << "Mapping status: " << status << std::endl;
@@ -376,7 +417,8 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
             for (size_t j = 0; j < y.size(); j++)
             {  
                 if(j > 0 && z[j]*z[j-1]<0){
-                    glColor3f(1,0,0);
+                    // glColor3f(1,0,0);
+                    glColor3f(r,g,b);
                 } else {
                     glColor3f(r,g,b);
                 } 
@@ -394,7 +436,8 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
             for (size_t j = 0; j < x.size(); j++)
             {   
                 if(j > 0 && z[j]*z[j-1]<0){
-                    glColor3f(1,0,0);
+                    // glColor3f(1,0,0);
+                    glColor3f(r,g,b);
                 } else {
                     glColor3f(r,g,b);
                 }
@@ -402,6 +445,34 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                 glVertex3f(x[j],y[i],z[j]/250.);   
             }
             z.clear();
+        glEnd();
+    }
+}
+
+template <class T>
+void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vector<T> > z, float r, float g, float b) {
+    // Plots the surface through sections of f(x,y)
+    // This function does not call f at each step, clearly better than the other one.
+    std::vector<T> zs;
+    for (size_t i = 0; i < x.size(); i++)
+    {
+        glBegin(GL_LINE_STRIP);
+            glColor3f(r,g,b);
+            for (size_t j = 0; j < y.size(); j++)
+            {  
+                glVertex3f(x[i],y[j],zs[j,i]);   
+            }
+        glEnd();
+    }
+
+    for (size_t i = 0; i < y.size(); i++)
+    {
+        glBegin(GL_LINE_STRIP);
+            glColor3f(r,g,b);
+            for (size_t j = 0; j < x.size(); j++)
+            {   
+                glVertex3f(x[j],y[i],zs[i,j]);   
+            }
         glEnd();
     }
 }
