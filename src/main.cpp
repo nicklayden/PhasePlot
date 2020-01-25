@@ -72,8 +72,8 @@ inline double alan_f(double r, double k) {
 }
 
 inline double alan_f_86(double r, double k) {
-    // Alans specific prob. Just wanted a graph showing the function
-    // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
+    // Alans function
+    // THIS IS A(r) 
     double a,b,c,d,e,f;
     a = sinh(k*M_PI);
     b = cosh(k*r);
@@ -110,7 +110,19 @@ class alan_func {
 };
 
 
+std::vector<double> uniform_grid(double a, double b, size_t N) {
+    // Create a uniform 1-D grid [a,b]
+    std::vector<double> grid;
+    for (int i = 0; i < N; ++i)
+    {
+        grid.push_back(a + i*(b-a)/N);
+    }
+    return grid;
+}
 
+std::vector<double> nonuniform_grid(double a, double b, size_t N, double (*param)(double,double)) {
+    // Create a non-uniform grid on [a,b], using a parameterization.
+}
 
 
 
@@ -136,33 +148,18 @@ int main(int argc, char** argv ){
     std::vector<std::vector<double> > zs;
     std::vector<double> xs,ys,slice;
     double begin,end,step,r0,rn,k0,kn;
-    uint N;
-    begin = -5;
-    end = 5;
-    N = 40;
-    step = (end - begin)/N;
-
-    // Simple uniform grid
-    // for (size_t i = 0; i < N; i++)
-    // {
-    //     xs.push_back(begin + step*i);
-    //     ys.push_back(begin + step*i);
-    // }
+    uint N=40;
     
 
     // Alan's 2 Variable system
-    r0 = M_PI/4. - 0.2;
-    rn = M_PI/4. + 0.2;
+    r0 = M_PI/4. - 0.1;
+    rn = M_PI/4. + 0.1;
     k0 = 1.01;
-    kn = 2;
+    kn = 1.5;
 
-    
-    for (size_t i = 0; i < N; i++)
-    {
-        std::cout << "F(r,k)= " << alan_f_86(M_PI/2.,1.5) << "  r= " << r0+i*(rn-r0)/N << std::endl;
-        xs.push_back(r0 + ((rn-r0)/N)*i );
-        ys.push_back(k0 + ((kn-k0)/N)*i);
-    }
+    xs = uniform_grid(r0,rn,N);
+    ys = uniform_grid(k0,kn,N);
+   
     
     // Evaluating the function on the mesh here.
     for (size_t i = 0; i < xs.size(); i++)
@@ -232,26 +229,7 @@ int main(int argc, char** argv ){
    */
     boost::program_options::variables_map vm;
     status = config_mapping(argc, argv, vm);
-    std::cout << "Mapping status: " << status << std::endl;
-    r = vm["init.conds.radius"].as<double>();
-    dr = vm["init.conds.dr"].as<double>();
-    tmax = vm["init.conds.thetamax"].as<double>();
-    xcenter = vm["init.conds.xcenter"].as<double>();
-    ycenter = vm["init.conds.ycenter"].as<double>();
-    numinit = vm["init.conds.numinit"].as<int>();
-    sysfile = vm["system.file"].as<std::string>();
-    sysmethod = vm["system.method"].as<std::string>();
-    maxtime = vm["system.timemax"].as<double>();
-    mintime = vm["system.timemin"].as<double>();
-    dt = vm["system.dt"].as<double>();
-    bkg_r = vm["gui.bkg_r"].as<float>();
-    bkg_g = vm["gui.bkg_g"].as<float>();
-    bkg_b = vm["gui.bkg_b"].as<float>();
-    bkg_alpha = vm["gui.bkg_alpha"].as<float>();
     gui_fovy = vm["gui.fovy"].as<float>();
-    gui_aspect = vm["gui.aspect"].as<float>();
-    gui_znear = vm["gui.znear"].as<float>();
-    gui_zfar = vm["gui.zfar"].as<float>();
     gui_camera_dist = vm["gui.camera_dist"].as<float>();
     Camera_controls["gui_camera_dist"] = gui_camera_dist;
     Camera_controls["gui_fovy"] = gui_fovy;
@@ -280,7 +258,7 @@ int main(int argc, char** argv ){
             cpDraw_Axes();
             // Plot the things we want to see
             plotSurface(alan_f,xs,ys);
-            plotSurface(zero_f,xs,ys,0.,1.,0.);
+            plotSurface(zero_f,xs,ys,0.5,0.,0.5);
 
             // Display everything we've done to the SFML instance
             mainwin.display();
@@ -301,8 +279,6 @@ void glSetup(boost::program_options::variables_map& vm, int argc, char** argv) {
     float bkg_alpha, bkg_r, bkg_g, bkg_b, \
           gui_aspect, gui_zfar, gui_znear, \
           gui_fovy, gui_camera_dist,gui_camera_dist_x,gui_camera_dist_y;
-    status = config_mapping(argc, argv, vm);
-    std::cout << "Mapping status: " << status << std::endl;
     r = vm["init.conds.radius"].as<double>();
     dr = vm["init.conds.dr"].as<double>();
     tmax = vm["init.conds.thetamax"].as<double>();
