@@ -71,7 +71,7 @@ inline double alan_f(double r, double k) {
     return e*(  f*a + k*b + g*( h*c + k*d )  );
 }
 
-inline double alan_f_86(double r, double k) {
+inline double alan_f_A(double r, double k) {
     // Alans function
     // THIS IS A(r) 
     double a,b,c,d,e,f;
@@ -84,6 +84,27 @@ inline double alan_f_86(double r, double k) {
 
     return e*(a*b - c*d + d) + f*(a*d - c*b + b);
 }
+
+inline double alan_f_Gr(double r, double k) {
+    // Alan's function G(r),r
+    // Depends on alan_f_A for calculating A(r2)
+    double a,b,c,d,r2;
+
+    a = sqrt(2)*cos(r);
+    b = sqrt(1- 0.5*sin(r)*sin(r));
+    c = a/b;
+    r2 = acos((-1/sqrt(2))*sin(r));
+
+    d = alan_f_A(r2,k);
+    return c*d;
+}
+
+inline double alan_theta(double r, double k) {
+    // Alan's function sqrt(theta) = F,r + G,r
+    // Depends on alan_f_Gr, alan_f
+    return alan_f(r,k) + alan_f_Gr(r,k);
+}
+
 
 
 class func {
@@ -132,7 +153,7 @@ int main(int argc, char** argv ){
         LOCAL VARIABLE DECLARATIONS AND PROGRAM SETTINGS
        #####################################################################################
     */
-    // Create SDL window instance
+    // Create SFML window instance
     sf::ContextSettings settings;
     settings.depthBits = 24; settings.majorVersion = 3; settings.minorVersion = 0;
     sf::RenderWindow mainwin(sf::VideoMode(800,800), "Phase Space", sf::Style::Default, settings);
@@ -161,17 +182,21 @@ int main(int argc, char** argv ){
     ys = uniform_grid(k0,kn,N);
    
     
-    // Evaluating the function on the mesh here.
-    for (size_t i = 0; i < xs.size(); i++)
+    // // Evaluating the function on the mesh here.
+    // for (size_t i = 0; i < xs.size(); i++)
+    // {
+    //     for (size_t j = 0; j < ys.size(); j++)
+    //     {
+    //         slice.push_back(alan_f_Gr(xs[i],ys[j]));
+    //     }
+    //     zs.push_back(slice);
+    //     slice.clear();
+    // }
+        
+    for (int i = 0; i < N; ++i)
     {
-        for (size_t j = 0; j < ys.size(); j++)
-        {
-            slice.push_back(alan_f_86(xs[i],ys[j]));
-        }
-        zs.push_back(slice);
-        slice.clear();
+        std::cout << "Bracket: r= " << r0 + i*(rn-r0)/N << "  f(r,k)= " << alan_theta(r0 + i*(rn-r0)/N, 1.2) << std::endl;
     }
-    
 
 
 
@@ -221,6 +246,7 @@ int main(int argc, char** argv ){
         LOAD PROGRAM CONFIGURATION FROM CONFIG.INI!!!!
     
         need to capture variables from the config file, and assign them in this block of main.
+        NEED TO REMOVE THIS SHIT EVENTUALLY
         #####################################################################################
     */
 
@@ -257,7 +283,7 @@ int main(int argc, char** argv ){
             // Draw the axes for a reference grid.
             cpDraw_Axes();
             // Plot the things we want to see
-            plotSurface(alan_f,xs,ys);
+            plotSurface(alan_theta,xs,ys);
             plotSurface(zero_f,xs,ys,0.5,0.,0.5);
 
             // Display everything we've done to the SFML instance
