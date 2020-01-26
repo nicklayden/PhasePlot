@@ -43,8 +43,10 @@ template <class T>
 void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r = 0.0, float g = 0.0, float b = 1.0);
 
 template <class T>
-void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vector<T> > z, float r, float g, float b);
+void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vector<T> > z, float r=0., float =0., float b=1.0);
 
+template<class T>
+std::vector<std::vector<T> > surface(T (*f)(T,T), std::vector<T> xs, std::vector<T> ys); 
 
 inline double f(double z, double eta) {
     return exp(-z*z - eta*eta);
@@ -172,15 +174,16 @@ int main(int argc, char** argv ){
     uint N=40;
     
 
-    // Alan's 2 Variable system
+    // Alan's 2 Variable system domain
     r0 = M_PI/4. - 0.1;
     rn = M_PI/4. + 0.1;
     k0 = 1.01;
     kn = 1.5;
 
+    // Mesh grid + function on the grid to be plotted in 3D.
     xs = uniform_grid(r0,rn,N);
     ys = uniform_grid(k0,kn,N);
-   
+    zs = surface(alan_theta,xs,ys);
     
     // // Evaluating the function on the mesh here.
     // for (size_t i = 0; i < xs.size(); i++)
@@ -283,8 +286,9 @@ int main(int argc, char** argv ){
             // Draw the axes for a reference grid.
             cpDraw_Axes();
             // Plot the things we want to see
-            plotSurface(alan_theta,xs,ys);
-            plotSurface(zero_f,xs,ys,0.5,0.,0.5);
+            // plotSurface(alan_theta,xs,ys);
+            // plotSurface(zero_f,xs,ys,0.5,0.,0.5);
+            plotSurface_fixed(xs,ys,zs);
 
             // Display everything we've done to the SFML instance
             mainwin.display();
@@ -455,14 +459,14 @@ template <class T>
 void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vector<T> > z, float r, float g, float b) {
     // Plots the surface through sections of f(x,y)
     // This function does not call f at each step, clearly better than the other one.
-    std::vector<T> zs;
+    // std::vector<T> zs;
     for (size_t i = 0; i < x.size(); i++)
     {
         glBegin(GL_LINE_STRIP);
             glColor3f(r,g,b);
             for (size_t j = 0; j < y.size(); j++)
             {  
-                glVertex3f(x[i],y[j],zs[j,i]);   
+                glVertex3f(x[i],y[j],z[i][j]/250.);   
             }
         glEnd();
     }
@@ -473,7 +477,7 @@ void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vecto
             glColor3f(r,g,b);
             for (size_t j = 0; j < x.size(); j++)
             {   
-                glVertex3f(x[j],y[i],zs[i,j]);   
+                glVertex3f(x[j],y[i],z[j][i]/250.);   
             }
         glEnd();
     }
@@ -578,4 +582,22 @@ void transformations(std::map<std::string, double>& controls, std::map<std::stri
     glRotatef(controls["anglex"]*controls["rotspeed"],1.0f,0.f,0.f);
     glRotatef(controls["angley"]*controls["rotspeed"],0.0f,1.0f,0.0f);
     glRotatef(controls["anglez"]*controls["rotspeed"],0.0f,0.0f,1.0f);
+}
+
+template<class T>
+std::vector<std::vector<T> > surface(T (*f)(T,T), std::vector<T> xs, std::vector<T> ys) {
+    // Evaluating the function on the mesh here.
+    std::vector<std::vector<T> > zs;
+    std::vector<T> slice;
+    for (size_t i = 0; i < xs.size(); i++)
+    {
+        for (size_t j = 0; j < ys.size(); j++)
+        {
+            slice.push_back(f(xs[i],ys[j]));
+        }
+        zs.push_back(slice);
+        slice.clear();
+    }
+    return zs;
+
 }
