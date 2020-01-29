@@ -107,6 +107,9 @@ inline double alan_theta(double r, double k) {
     return alan_f(r,k) + alan_f_Gr(r,k);
 }
 
+inline double alan_ar_test(double r, double k) {
+    return alan_f_A(r,k) - alan_f_A(M_PI/2. - r, k); 
+}
 
 
 class func {
@@ -183,7 +186,7 @@ int main(int argc, char** argv ){
     // Mesh grid + function on the grid to be plotted in 3D.
     xs = uniform_grid(r0,rn,N);
     ys = uniform_grid(k0,kn,N);
-    zs = surface(alan_theta,xs,ys);
+    zs = surface(alan_ar_test,xs,ys);
     
     // // Evaluating the function on the mesh here.
     // for (size_t i = 0; i < xs.size(); i++)
