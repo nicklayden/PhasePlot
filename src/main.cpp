@@ -56,6 +56,7 @@ inline double zero_f(double r, double k){
     return 0;
 }
 
+
 inline double alan_f(double r, double k) {
     // Alans specific prob. Just wanted a graph showing the function
     // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
@@ -109,6 +110,23 @@ inline double alan_theta(double r, double k) {
 
 inline double alan_ar_test(double r, double k) {
     return alan_f_A(r,k) - alan_f_A(M_PI/2. - r, k); 
+}
+
+
+inline double plane(double x, double y) {
+    //eqn for a plane: ax + by + cz = d
+    // as f(x,y) -> z = (d - ax - by)/c
+    double a,b,c,d;
+    a = 1.0;
+    b = 3.0;
+    c = 2.0;
+    d = 1.0;
+
+    return (d - a*x - b*y)/c;
+}
+
+inline double paraboloid(double x, double y) {
+    return x*x + y*y;
 }
 
 
@@ -180,8 +198,8 @@ int main(int argc, char** argv ){
     // Alan's 2 Variable system domain
     r0 = M_PI/4. - 0.1;
     rn = M_PI/4. + 0.1;
-    k0 = 1.01;
-    kn = 1.5;
+    k0 = 0.9;
+    kn = 1.1;
 
     // Mesh grid + function on the grid to be plotted in 3D.
     xs = uniform_grid(r0,rn,N);
@@ -289,9 +307,10 @@ int main(int argc, char** argv ){
             // Draw the axes for a reference grid.
             cpDraw_Axes();
             // Plot the things we want to see
-            // plotSurface(alan_theta,xs,ys);
-            // plotSurface(zero_f,xs,ys,0.5,0.,0.5);
-            plotSurface_fixed(xs,ys,zs);
+            plotSurface(alan_theta,xs,ys);
+            plotSurface(zero_f,xs,ys,0.5,0.,0.5);
+            // plotSurface(paraboloid,xs,ys,1.0,0.,0.2);
+            // plotSurface_fixed(xs,ys,zs);
 
             // Display everything we've done to the SFML instance
             mainwin.display();
@@ -432,7 +451,7 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                     glColor3f(r,g,b);
                 } 
                 z.push_back(f(x[i],y[j]));
-                glVertex3f(x[i],y[j],z[j]/250.);   
+                glVertex3f(x[i],y[j],z[j]/500.);   
             }
             z.clear();
         glEnd();
@@ -451,7 +470,7 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                     glColor3f(r,g,b);
                 }
                 z.push_back(f(x[j],y[i]));
-                glVertex3f(x[j],y[i],z[j]/250.);   
+                glVertex3f(x[j],y[i],z[j]/500.);   
             }
             z.clear();
         glEnd();
