@@ -61,17 +61,17 @@ inline double alan_f(double r, double k) {
     // Alans specific prob. Just wanted a graph showing the function
     // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
     double a,b,c,d,e,f,g,h;
-    a = sinh(k*(M_PI - r) + sinh(k*r));
-    b = cosh(k*(M_PI - r) - cosh(k*r));
-    c = sinh(k*(M_PI/2. + r) + sinh(k*(M_PI/2. - r)));
-    d = cosh(k*(M_PI/2. + r) - cosh(k*(M_PI/2. - r)));
+    a = sinh(k*(M_PI - r)) + sinh(k*r);
+    b = cosh(k*(M_PI - r)) - cosh(k*r);
+    c = sinh(k*(M_PI/2. + r)) + sinh(k*(M_PI/2. - r));
+    d = cosh(k*(M_PI/2. + r)) - cosh(k*(M_PI/2. - r));
 
     e = -(1./sin(r));
     f = -cos(r)/(sin(r)*sin(r));
     g = 1./cos(r);
     h = tan(r);
 
-    return e*(  f*a + k*b + g*( h*c + k*d )  );
+    return e*(  f*a + k*b) + g*( h*c + k*d )  ;
 }
 
 inline double alan_f_A(double r, double k) {
@@ -94,9 +94,9 @@ inline double alan_f_Gr(double r, double k) {
     double a,b,c,d,r2;
 
     a = sqrt(2)*cos(r);
-    b = sqrt(1- 0.5*sin(r)*sin(r));
+    b = sqrt(1. - 0.5*sin(r)*sin(r));
     c = a/b;
-    r2 = acos((-1/sqrt(2))*sin(r));
+    r2 = acos(sin(r)*(-1/sqrt(2)));
 
     d = alan_f_A(r2,k);
     return c*d;
@@ -105,7 +105,7 @@ inline double alan_f_Gr(double r, double k) {
 inline double alan_theta(double r, double k) {
     // Alan's function sqrt(theta) = F,r + G,r
     // Depends on alan_f_Gr, alan_f
-    return alan_f(r,k) + alan_f_Gr(r,k);
+    return alan_f_A(r,k) + alan_f_Gr(r,k);
 }
 
 inline double alan_ar_test(double r, double k) {
@@ -169,6 +169,11 @@ std::vector<double> nonuniform_grid(double a, double b, size_t N, double (*param
 }
 
 
+inline double alan_const_k(double r, double k) {
+    return alan_f_A(r,1.0);
+}
+
+
 
 int main(int argc, char** argv ){  
 
@@ -192,12 +197,12 @@ int main(int argc, char** argv ){
     std::vector<std::vector<double> > zs;
     std::vector<double> xs,ys,slice;
     double begin,end,step,r0,rn,k0,kn;
-    uint N=40;
+    uint N=100;
     
 
     // Alan's 2 Variable system domain
-    r0 = M_PI/4. - 0.1;
-    rn = M_PI/4. + 0.1;
+    r0 = -3.;
+    rn = 3.;
     k0 = 0.9;
     kn = 1.1;
 
@@ -219,7 +224,7 @@ int main(int argc, char** argv ){
         
     for (int i = 0; i < N; ++i)
     {
-        std::cout << "Bracket: r= " << r0 + i*(rn-r0)/N << "  f(r,k)= " << alan_theta(r0 + i*(rn-r0)/N, 1.2) << std::endl;
+        std::cout << "Bracket: r= " << r0 + i*(rn-r0)/N << "  f(r,k)= " << alan_ar_test(r0 + i*(rn-r0)/N, 1.2) << std::endl;
     }
 
 
@@ -307,7 +312,7 @@ int main(int argc, char** argv ){
             // Draw the axes for a reference grid.
             cpDraw_Axes();
             // Plot the things we want to see
-            plotSurface(alan_theta,xs,ys);
+            plotSurface(alan_const_k,xs,ys);
             plotSurface(zero_f,xs,ys,0.5,0.,0.5);
             // plotSurface(paraboloid,xs,ys,1.0,0.,0.2);
             // plotSurface_fixed(xs,ys,zs);
@@ -451,7 +456,7 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                     glColor3f(r,g,b);
                 } 
                 z.push_back(f(x[i],y[j]));
-                glVertex3f(x[i],y[j],z[j]/500.);   
+                glVertex3f(x[i]-M_PI/4 +0.1,y[j]-0.9,z[j]/500.);   
             }
             z.clear();
         glEnd();
@@ -470,7 +475,7 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                     glColor3f(r,g,b);
                 }
                 z.push_back(f(x[j],y[i]));
-                glVertex3f(x[j],y[i],z[j]/500.);   
+                glVertex3f(x[j]-M_PI/4 +0.1,y[i]-0.9,z[j]/500.);   
             }
             z.clear();
         glEnd();
