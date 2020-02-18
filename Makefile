@@ -6,7 +6,7 @@ cxx = g++
 program = plot
 
 # source files
-srcs = main.cpp cmdline.cpp
+srcs = main.cpp cmdline.cpp window.cpp
 
 # directory to sources and compiled obj files
 srcdir = src
