@@ -189,16 +189,7 @@ int main(int argc, char** argv ){
     ys = uniform_grid(k0,kn,N);
     zs = surface(alan_ar_test,xs,ys);
     
-    // // Evaluating the function on the mesh here.
-    // for (size_t i = 0; i < xs.size(); i++)
-    // {
-    //     for (size_t j = 0; j < ys.size(); j++)
-    //     {
-    //         slice.push_back(alan_f_Gr(xs[i],ys[j]));
-    //     }
-    //     zs.push_back(slice);
-    //     slice.clear();
-    // }
+
         
     // for (int i = 0; i < N; ++i)
     // {
