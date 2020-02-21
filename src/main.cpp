@@ -215,9 +215,9 @@ int main(int argc, char** argv ){
     // Initial conditions, dynamical system settings, and gui settings for the window.
     int numinit, status;
     double r, dr, tmax, xcenter, ycenter,dt,maxtime,mintime;
-    float bkg_alpha, bkg_r, bkg_g, bkg_b, \
-          gui_aspect, gui_zfar, gui_znear, \
-          gui_fovy, gui_camera_dist,gui_camera_dist_x,gui_camera_dist_y;
+    // float bkg_alpha, bkg_r, bkg_g, bkg_b, \
+    //       gui_aspect, gui_zfar, gui_znear, \
+    //       gui_fovy, gui_camera_dist,gui_camera_dist_x,gui_camera_dist_y;
     std::string sysmethod, sysfile;
     gui_camera_dist_x = 0.f;
     gui_camera_dist_y = 0.f;
