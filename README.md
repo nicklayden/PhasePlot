@@ -31,6 +31,11 @@ Or all together as
 
 ```
     sudo apt-get install libsfml-dev libboost-all-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev
+```
 
-
+## Compiling and Running
+The compilation of this program has been put into a Makefile, adding modules to the program will need to be reflected in the Makefile for proper compilation and linking.
+The following command will invoke the Makefile and when completed, start the program.
+```
+    make && ./plot
 ```
