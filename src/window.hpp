@@ -55,7 +55,7 @@ void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vecto
             glColor3f(r,g,b);
             for (size_t j = 0; j < y.size(); j++)
             {  
-                glVertex3f(x[i],y[j],z[i][j]/250.);   
+                glVertex3f(x[i],y[j],z[i][j]);   
             }
         glEnd();
     }
@@ -66,7 +66,7 @@ void plotSurface_fixed(std::vector<T> x,std::vector<T> y, std::vector<std::vecto
             glColor3f(r,g,b);
             for (size_t j = 0; j < x.size(); j++)
             {   
-                glVertex3f(x[j],y[i],z[j][i]/250.);   
+                glVertex3f(x[j],y[i],z[j][i]);   
             }
         glEnd();
     }
@@ -90,7 +90,7 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                     glColor3f(r,g,b);
                 } 
                 z.push_back(f(x[i],y[j]));
-                glVertex3f(x[i]-M_PI/4 +0.1,y[j]-0.9,z[j]/500.);   
+                glVertex3f(x[i],y[j],z[j]/500.);   
             }
             z.clear();
         glEnd();
@@ -109,7 +109,7 @@ void plotSurface(T (*f)(T,T),std::vector<T> x,std::vector<T> y, float r, float g
                     glColor3f(r,g,b);
                 }
                 z.push_back(f(x[j],y[i]));
-                glVertex3f(x[j]-M_PI/4 +0.1,y[i]-0.9,z[j]/500.);   
+                glVertex3f(x[j],y[i],z[j]/500.);   
             }
             z.clear();
         glEnd();

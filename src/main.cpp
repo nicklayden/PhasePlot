@@ -56,14 +56,17 @@ inline double alan_f_A(double r, double k) {
     // Alans function
     // THIS IS A(r) 
     double a,b,c,d,e,f;
-    a = sinh(k*M_PI);
-    b = cosh(k*r);
-    c = cosh(k*M_PI);
-    d = sinh(k*r);
-    e = -cos(r)/(sin(r)*sin(r));
-    f = k/sin(r);
 
-    return e*(a*b - c*d + d) + f*(a*d - c*b + b);
+    a = sinh(k*M_PI) * cosh(k*r) - cosh(k*M_PI) * sinh(k*r) + sinh(k*r);
+
+    b = sinh(k*M_PI) * sinh(k*r) - cosh(k*M_PI) * cosh(k*r) + cosh(k*r);
+
+    c = -cos(r)/(pow(sin(r),2));
+
+    d = k/sin(r);
+
+
+    return c*a + d*b;
 }
 
 inline double alan_f_Gr(double r, double k) {
@@ -72,12 +75,14 @@ inline double alan_f_Gr(double r, double k) {
     double a,b,c,d,r2;
 
     a = sqrt(2)*cos(r);
-    b = sqrt(1. - 0.5*sin(r)*sin(r));
-    c = a/b;
-    r2 = acos(sin(r)*(-1/sqrt(2)));
+    b = 1 - pow(sin(r),2)/2.;
+    c = sqrt(b);
 
-    d = alan_f_A(r2,k);
-    return c*d;
+    d = -sin(r)/sqrt(2);
+    r2 = acos(d);
+
+    return  (a/c)*alan_f_A(r2,k);
+
 }
 
 inline double alan_theta(double r, double k) {
@@ -90,6 +95,9 @@ inline double alan_ar_test(double r, double k) {
     return alan_f_A(r,k) - alan_f_A(M_PI/2. - r, k); 
 }
 
+inline double example2(double x, double y) {
+    return y - sin(y);
+}
 
 inline double plane(double x, double y) {
     //eqn for a plane: ax + by + cz = d
@@ -179,10 +187,10 @@ int main(int argc, char** argv ){
     
 
     // Alan's 2 Variable system domain
-    r0 = -3.;
-    rn = 3.;
-    k0 = 0.9;
-    kn = 1.1;
+    r0 = M_PI/4. - 0.1;
+    rn = M_PI/4. + 0.1;
+    k0 = 0.55;
+    kn = 2.1;
 
     // Mesh grid + function on the grid to be plotted in 3D.
     xs = uniform_grid(r0,rn,N);
@@ -190,13 +198,7 @@ int main(int argc, char** argv ){
     zs = surface(alan_ar_test,xs,ys);
     
 
-        
-    // for (int i = 0; i < N; ++i)
-    // {
-    //     std::cout << "Bracket: r= " << r0 + i*(rn-r0)/N << "  f(r,k)= " << alan_ar_test(r0 + i*(rn-r0)/N, 1.2) << std::endl;
-    // }
-
-
+    
 
     // Camera rotation flags and properties.
     bool rotate = false;
@@ -215,9 +217,9 @@ int main(int argc, char** argv ){
     // Initial conditions, dynamical system settings, and gui settings for the window.
     int numinit, status;
     double r, dr, tmax, xcenter, ycenter,dt,maxtime,mintime;
-    // float bkg_alpha, bkg_r, bkg_g, bkg_b, \
-    //       gui_aspect, gui_zfar, gui_znear, \
-    //       gui_fovy, gui_camera_dist,gui_camera_dist_x,gui_camera_dist_y;
+    float bkg_alpha, bkg_r, bkg_g, bkg_b, \
+          gui_aspect, gui_zfar, gui_znear, \
+          gui_fovy, gui_camera_dist,gui_camera_dist_x,gui_camera_dist_y;
     std::string sysmethod, sysfile;
     gui_camera_dist_x = 0.f;
     gui_camera_dist_y = 0.f;
@@ -281,7 +283,7 @@ int main(int argc, char** argv ){
             // Draw the axes for a reference grid.
             cpDraw_Axes();
             // Plot the things we want to see
-            plotSurface(alan_const_k,xs,ys);
+            plotSurface(alan_ar_test,xs,ys);
             plotSurface(zero_f,xs,ys,0.5,0.,0.5);
             // plotSurface(paraboloid,xs,ys,1.0,0.,0.2);
             // plotSurface_fixed(xs,ys,zs);
